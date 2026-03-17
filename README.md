@@ -1,4 +1,4 @@
-# 🛡️ Infrastructure Automation & Security Hardening (Projet Barzini)
+# 🛡️ Infrastructure - Automatisation & Security - Projet Barzini
 
 ![Badge Ansible](https://img.shields.io/badge/Ansible-2.10+-black?style=for-the-badge&logo=ansible)
 ![Badge PowerShell](https://img.shields.io/badge/PowerShell-7.0-blue?style=for-the-badge&logo=powershell)
