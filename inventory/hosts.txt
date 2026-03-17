@@ -1,0 +1,25 @@
+[GG_M_Linux]
+## IP Client Linux AD
+PFX-SIT-015 ansible_host=10.0.2.15
+
+[GG_M_Windows]
+## IP Cclient Windows AD
+PFX-SIT-010 ansible_host=10.0.2.10
+
+[GG_M_Administration]
+## MACHINE pour l'administration
+PFX-SIT-010 ansible_host=10.0.2.10
+
+[GG_M_Linux:vars]
+ansible_user=ansible.service@barzini.local
+ansible_ssh_private_key_file=/home/user-ansible/.ssh/id_ed25519
+ansible_become=yes
+
+[GG_M_Windows:vars]
+ansible_user=ansible.service@barzini.local
+ansible_password="{{ win_ad_password }}"
+ansible_connection=winrm
+ansible_port=5986
+ansible_winrm_server_cert_validation=ignore
+ansible_winrm_transport=ntlm
+

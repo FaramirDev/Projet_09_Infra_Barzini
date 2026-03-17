@@ -1,0 +1,129 @@
+---
+# Version : 1.1 
+# Autheur : Alexis Rousseau - Administrateur
+# Mise a jours Windows / Linux 
+#
+# ======================================================================
+# PLAY 1 : MISES A JOUR WINDOWS (GG_M_Windows)
+# ======================================================================
+- name: GESTION DES MISES A JOUR - PARC WINDOWS
+  hosts: GG_M_Windows
+  gather_facts: no
+  vars:
+    ansible_become: yes
+    ansible_become_method: runas
+    ansible_become_user: "ansible.service@barzini.local"
+    ansible_become_password: "{{ win_ad_password }}"
+
+  tasks:
+    - name: 1. Verifier la connexion Internet (Windows)
+      ansible.windows.win_uri:
+        url: https://www.google.com
+        return_content: no
+      register: internet_check_win
+      ignore_errors: true
+
+    - name: 2. ALERTE - Aucune connexion Internet detectee
+      ansible.builtin.debug:
+        msg: "PAS DE CONNEXION INTERNET. Les mises a jour Windows sont annulees."
+      when: internet_check_win.status_code | default(0) != 200
+
+    - name: 3. Lancer les mises a jour Windows ET redemarrer si necessaire
+      ansible.windows.win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+        state: installed
+        reboot: yes 
+        reboot_timeout: 3600
+      when: internet_check_win.status_code | default(0) == 200
+      register: update_result_win # <-- On enregistre le resultat ici
+
+    # --- NOUVEAU MESSAGE SI DEJA A JOUR ---
+    - name: 4a. INFO - La machine Windows est deja a jour
+      ansible.builtin.debug:
+        msg: "[OK] Cette machine Windows dispose deja des dernieres mises a jour. Aucune action necessaire."
+      when: 
+        - internet_check_win.status_code | default(0) == 200
+        - not update_result_win.changed # S'active UNIQUEMENT si rien n'a change
+
+    - name: 4b. Bilan des mises a jour Windows installees
+      ansible.builtin.debug:
+        msg: "[SUCCES] Nouvelles mises a jour installees. La machine a-t-elle redemarre ? {{ update_result_win.rebooted | default('Non') }}"
+      when: 
+        - internet_check_win.status_code | default(0) == 200
+        - update_result_win.changed # S'active UNIQUEMENT s'il y a eu des installations
+
+
+# ======================================================================
+# PLAY 2 : MISES A JOUR LINUX (GG_M_Linux)
+# ======================================================================
+- name: GESTION DES MISES A JOUR - PARC LINUX
+  hosts: GG_M_Linux
+  gather_facts: yes 
+  become: yes       
+
+  tasks:
+    - name: 1. Verifier la connexion Internet (Linux)
+      ansible.builtin.uri:
+        url: https://www.google.com
+        return_content: no
+      register: internet_check_lin
+      ignore_errors: true
+
+    - name: 2. ALERTE - Aucune connexion Internet detectee
+      ansible.builtin.debug:
+        msg: "PAS DE CONNEXION INTERNET. Les mises a jour Linux sont annulees."
+      when: internet_check_lin.status_code | default(0) != 200
+
+    # --- DEBIAN / UBUNTU ---
+    - name: 3a. Mettre a jour les paquets (Debian / Ubuntu)
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+      when: 
+        - internet_check_lin.status_code | default(0) == 200
+        - ansible_os_family == "Debian"
+      register: apt_update_result # <-- On enregistre le resultat APT
+
+    - name: 4a. Verifier si un redemarrage est requis (Debian / Ubuntu)
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required_debian
+      when: ansible_os_family == "Debian"
+
+    # --- REDHAT / CENTOS / ROCKY ---
+    - name: 3b. Mettre a jour les paquets (RedHat / CentOS)
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+      when: 
+        - internet_check_lin.status_code | default(0) == 200
+        - ansible_os_family == "RedHat"
+      register: dnf_update_result # <-- On enregistre le resultat DNF
+
+    - name: 4b. Verifier si un redemarrage est requis (RedHat / CentOS)
+      ansible.builtin.command: dnf needs-restarting -r
+      register: reboot_required_redhat
+      failed_when: false
+      changed_when: reboot_required_redhat.rc == 1
+      when: ansible_os_family == "RedHat"
+
+    # --- NOUVEAU MESSAGE SI DEJA A JOUR LINUX ---
+    - name: 4c. INFO - Le serveur Linux est deja a jour
+      ansible.builtin.debug:
+        msg: "[OK] Ce serveur Linux dispose deja des derniers paquets. Aucune action necessaire."
+      when:
+        - internet_check_lin.status_code | default(0) == 200
+        - (ansible_os_family == 'Debian' and not apt_update_result.changed) or (ansible_os_family == 'RedHat' and not dnf_update_result.changed)
+
+    # --- REDEMARRAGE COMMUN LINUX ---
+    - name: 5. Redemarrer le serveur Linux si necessaire
+      ansible.builtin.reboot:
+        msg: "Redemarrage initie par Ansible suite a l'installation de mises a jour."
+        reboot_timeout: 1200
+      when: 
+        - internet_check_lin.status_code | default(0) == 200
+        - (ansible_os_family == 'Debian' and reboot_required_debian.stat.exists | default(false)) or
+          (ansible_os_family == 'RedHat' and reboot_required_redhat.rc | default(0) == 1)

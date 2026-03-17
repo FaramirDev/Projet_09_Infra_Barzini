@@ -1,0 +1,69 @@
+---
+# ======================================================================
+# PLAY 1 : Audit Machines WINDOWS (GG_M_Windows)
+# Version : 1.1
+# Autheur : Alexis Rousseau - Administrateur
+# Descriptions : Audit en pushant le script d'Audit ( basé sur une Data Green & Red )
+# ======================================================================
+- name: AUDIT POSTE PC BARZINI Windows 
+  hosts: GG_M_Windows
+
+  vars:
+    ## USER & Methode pour JETON Serveur
+    ansible_become: yes
+    ansible_become_method: runas
+    ansible_become_user: "ansible.service@barzini.local"
+    ansible_become_password: "{{ win_ad_password }}"
+
+    ## DEFINI LA Date 1 fois pour TOUT le playbook
+    audit_date: "{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
+    share_root: "\\\\SRV-BARZINI-AD.barzini.local\\ansible$"
+
+    temp_folder_name: "[TEMP]Rapport_AnsibleLog_{{ audit_date }}"
+    final_folder_name: "Rapport_ansibleLog_{{ audit_date }}"
+
+    ## CHEMIN COMPLETS
+    temp_report_path: "{{ share_root }}\\{{ temp_folder_name }}"
+    final_report_path: "{{ share_root }}\\{{ final_folder_name }} "
+    
+    ##SCRIPT Version
+    script_audit: "Audit_Windows_v10.ps1"
+
+  tasks:
+    ## PARTIE 1 : CREATION DOSSIER [TEMP] Pour DESTINATION des RAPPORTS AUDIT
+    - name: 1. CREATION DOSSIER RAPPORTS 
+      win_file: 
+        path: "{{ temp_report_path }}"
+        state: directory
+      run_once: true        
+    
+    ## PARTIE 2 : ENVOYER LE SCRIPT SUR LES MACHINES CLIENTES
+    - name: 2. RECUPERATTION DU SCRIPT AUDIT des MACHINES WINDOWS
+      win_copy:
+        src: /home/user-ansible/barzini_ansible/scripts/Audit_Windows_v10.ps1
+        dest: C:\temp\Audit_Windows_v10.ps1   
+
+    ## PARTIE 3 : EXECUTION DU SCRIPT en MODE ADMINISTRATEUR
+    - name: 3. EXECUTION DU SCRIPT d'AUDIT en MODE ADMINISTRATEUR
+      ansible.windows.win_shell: |
+        & "C:\temp\Audit_Windows_v10.ps1" -SharePathData "{{share_root}}" -SharePathReport "{{ temp_report_path }}"
+      register: script_output            
+      
+    - name: Afficher la Sortie du script 
+      ansible.builtin.debug:
+        var: script_output.stdout_lines
+    
+  
+    ## PARTIE 4 : SUPPRIMER LE SCRIPT de la machine Cliente
+    - name: 4. Suppression du fichier script de la machine
+      ansible.windows.win_file:
+        path: C:\temp\Audit_Windows_v10.ps1
+        state: absent
+
+    ## PARTIE 5 : RETIRER LE TEMP du DOSSIER une fois AUDIT TERMINER
+    - name: 5. Retirer la mention TEMP du dossier 
+      ansible.windows.win_shell: |
+        Rename-Item -LiteralPath "{{ temp_report_path }}" -NewName "{{ final_report_path }}"
+      run_once: true
+
+   
