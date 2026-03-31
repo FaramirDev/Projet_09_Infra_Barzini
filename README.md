@@ -1,14 +1,15 @@
-# 🛡️ Infrastructure - Automatisation & Security - Projet Barzini
+# 🛡️ Industrialisation Parc Hybride & Strategie de Backup
+## Automatisation & Security - Projet Studio Barzini
 
 ![Badge Ansible](https://img.shields.io/badge/Ansible-2.10+-black?style=for-the-badge&logo=ansible)
 ![Badge PowerShell](https://img.shields.io/badge/PowerShell-7.0-blue?style=for-the-badge&logo=powershell)
 ![Badge Python](https://img.shields.io/badge/Python-3.8+-yellow?style=for-the-badge&logo=python)
 ![Badge License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-## 📌 Présentation du Projet
+## ------ Présentation du Projet ------
 Ce projet vise à moderniser, automatiser et sécuriser l'infrastructure hybride de l'entreprise **Barzini**. L'objectif est de passer d'une gestion manuelle à une approche **Infrastructure as Code (IaC)** tout en garantissant une résilience totale des données.
 
-### 🚀 Objectifs Clés :
+### ------ Objectifs Clés ------
 * **Centralisation de l'Identité :** Déploiement d'un annuaire Active Directory (Modèle AGDLP).
 * **Orchestration & Automatisation :** Gestion du parc mixte (Windows/Linux) via Ansible (Agentless).
 * **Audit de Conformité :** Développement de scripts (PowerShell/Python) pour le monitoring des logiciels non autorisés et des permissions critiques.
@@ -16,7 +17,7 @@ Ce projet vise à moderniser, automatiser et sécuriser l'infrastructure hybride
 
 ---
 
-## 🏗️ Architecture & Flux
+## ------ Architecture & Flux ------ 
 L'infrastructure repose sur un serveur de contrôle Ansible (Ubuntu) communiquant via des flux sécurisés.
 
 ![Schema Architecture](/Captures/p9-Architecture_outpwd.jpg)
@@ -25,7 +26,7 @@ L'infrastructure repose sur un serveur de contrôle Ansible (Ubuntu) communiquan
 * **Gestion Linux :** SSH (Port 22).
 * **Stockage :** Partages SMB sécurisés pour la centralisation des rapports d'audit.
 
-### Tableau des Flux : 
+### ------ Tableau des Flux ------  
 
 
 | Source | Destination | Protocole | Usage |
@@ -41,7 +42,7 @@ L'infrastructure repose sur un serveur de contrôle Ansible (Ubuntu) communiquan
 
 ---
 
-## 🛠️ Stack Technique
+## ------ Stack Technique ------ 
 * **Systèmes :** Windows Server 2022 (AD DS), Windows 11, Ubuntu 22.04 LTS.
 * **Automatisation :** Ansible (Playbooks, Vault, Roles).
 * **Scripting :** PowerShell (Audit Windows), Python (Audit Linux / Shadow file).
@@ -50,7 +51,7 @@ L'infrastructure repose sur un serveur de contrôle Ansible (Ubuntu) communiquan
 
 ---
 
-## 🔒 Focus Cybersécurité
+## 🔒 ------ Focus Cybersécurité ------ 
 1. **Modèle AGDLP :** Organisation stricte des groupes de sécurité pour respecter le principe du moindre privilège.
 2. **Hardening Ansible :** Utilisation systématique d'**Ansible Vault** pour le chiffrement des secrets et certificats SSL pour WinRM.
 3. **Audit de Conformité :** Scripts automatisés détectant les dérives de configuration (shadow file permissions) et la présence de logiciels interdits (Blacklisting).
@@ -58,7 +59,7 @@ L'infrastructure repose sur un serveur de contrôle Ansible (Ubuntu) communiquan
 
 ---
 
-## 📂 Structure du Dépôt
+## 📂 ------ Structure du Dépôt ------ 
 ```text
 ├── playbooks/            # Playbooks Ansible (Audit, Updates, Config)
 ├── scripts/              # Scripts d'audit (Python & PowerShell)
@@ -67,9 +68,26 @@ L'infrastructure repose sur un serveur de contrôle Ansible (Ubuntu) communiquan
 ├── Captures/             # Captures Readme
 └── README.md
 ```
+
 ---
+## ------ SOMMAIRE ------ 
+- [Partie 1 : Presentation Serveur Windows Active Directory](#-------partie-1---presentation-serveur-win-ad--identité--gouvernance-------)
+    - [1. Gourvernace Annuaire - Data Driven](#1-gouvernance-de-lannuaire-data-driven-ad)
+    - [2. Implementation Modele AGDLP](#2-implémentation-du-modèle-agdlp)
+    - [3. Service de Partage - Permission NTFS](#3-service-de-fichiers--permissions-ntfs)
+    - [4. Coffre Fort - Cryptomator & KeePass](#4-coffre-fort-numérique--cryptomator--keepass)
+
+- [Partie 2 : Presenation Serveur Linux - Ansible](#-------partie-2--presentation-serveur-linux-ansible--orchestration--------)
+    - [1. DEMO - Automatisation n°1 - Audit Parc Windows](#----demonstration-automatisation-n1-audit-des-machines-windows-via-serveur-ansible----)
+    - [2. DEMO - Automatisation n°2 - Audit Serveur Ansible](#----demonstration-automatisation-n2---hardening-du-serveur-ansible-python----)
+    - [3. DEMO - Automatisation n°3 - Mise à Jours Parc Hybride](#----demonstration-automatisation-n3---gestion-du-cycle-de-vie-patch-management----)
+    
+- [Partie 3 : Presentation Politique & Configuration de Sauvegarde - VEAAM](#-------partie-3--presentation--politique-de-sauvegarde---veeam-backup-------)
+    - [1. Scenarios Restauration Critiques](#2-scénarios-de-restauration-critiques)
+---
+## ------ Presentation ------ 
 ![ Capture Annoncement Presenation AD](./Captures/Partie-01-AD/00-Presenation.png)
-## 🏛️ Presentation Serveur Windows Active Directory : Identité & Gouvernance
+## ------ PARTIE 1 :  Presentation Serveur Win AD : Identité & Gouvernance ------ 
 ### 1. Gouvernance de l'Annuaire (Data-Driven AD)
 Industrialisation de la gestion des objets via PowerShell pour garantir l'intégrité des données.
 
@@ -113,7 +131,7 @@ Sécurisation des secrets et des données ultra-sensibles.
 ---
 ![ Capture Annoncement Presenation AD](./Captures/Partie-02-Ansible/00-Presenatiion-2.png)
 
-## 🤖 Presentation Serveur Linux Ansible : Orchestration & mpliance
+## ------ PARTIE 2 : Presentation Serveur Linux Ansible : Orchestration  ------ 
 ### 1. Architecture Infrastructure as Code (IaC)
 Organisation modulaire du serveur Ansible (Inventaires dynamiques, `group_vars` chiffrés par **Vault**.)
 
@@ -128,7 +146,7 @@ Flux automatisé de détection des dérives logicielles.
 
 - **Reporting** : Centralisation automatique des rapports d'audit `[OK]` ou `[REFUSE-ALERTE]` avec tentative de **Desinstallation** puis écriture du rapport sur le serveur de logs AD (`Ansible$`).
 
-### Demonstration Automatisation n°1 Audit des Machines windows via Serveur Ansible
+### --- Demonstration Automatisation n°1 Audit des Machines windows via Serveur Ansible --- 
 
 Lors de la démonstration, nous avons renseigné dans la liste Rouge le Software `Canva` qui a été préablement installé sur la machine cible afin de démontré l'efficacité du Script d'Audit. 
 
@@ -141,7 +159,7 @@ Lors de la démonstration, nous avons renseigné dans la liste Rouge le Software
 **3. Rapport Detaillé de l'Audit :**
 ![Capture Demonstration Script audit 01 - 3](./Captures/Partie-02-Ansible/01-AuditWindows03.jpg)
 
-### 3. Hardening du Serveur Ansible (Python)
+### --- Demonstration Automatisation n°2 - Hardening du Serveur Ansible (Python) ---
 Audit de sécurité interne du nœud de contrôle pour prévenir toute escalade de privilèges.
 
 - **Vérification Python** : Analyse des permissions et des propriétaires `(root:root)` sur les fichiers critiques : `/etc/shadow`, clés privées `SSH`, et configurations `ansible.cfg`.
@@ -151,7 +169,7 @@ Audit de sécurité interne du nœud de contrôle pour prévenir toute escalade 
 **1. Lancement & Résultat de l'Audit du Serveur Ansible :** 
 ![Capture Demonstration Audit Serveur Ansible](./Captures/Partie-02-Ansible/02-AuditAnsible01.jpg)
 
-### 4. Gestion du Cycle de Vie (Patch Management)
+### --- Demonstration Automatisation n°3 - Gestion du Cycle de Vie (Patch Management) ---
 Playbooks d'automatisation des mises à jour système (Windows Updates & Apt-Upgrade) avec gestion des redémarrages et vérification post-patching.
 
 **1. Schéma du Dérouler du Playbook :**
@@ -162,7 +180,7 @@ Playbooks d'automatisation des mises à jour système (Windows Updates & Apt-Upg
 
 ---
 ![Capture Presenation Veeam Backup](/Captures/Partie-03-VeeamBackup/00-Presentation.png)
-## Presentation  Service de Sauvegarde : VEEAM Backup & Replication
+## ------ PARTIE 3 : Presentation  Politique de Sauvegarde - VEEAM Backup ------ 
 ### 1. Politique de Sauvegarde (BCP/DRP)
 **Rédaction** d'une **Politique** de **Sauvegarde** avec un Plan de Continuité d'Activité incluant la règle du 3-2-1-1-0, disponible dans les **Livrables**.
 
@@ -177,7 +195,7 @@ Playbooks d'automatisation des mises à jour système (Windows Updates & Apt-Upg
 
 ![Capture Sommaire Documentation](./Captures/Partie-03-VeeamBackup/01-Sommaire.png)
 
-## Conclusion
+## ------ Conclusion ------ 
 Ce projet démontre une approche DevSecOps de l'administration système, où l'automatisation et la sécurité sont intégrées dès la conception. L'infrastructure est désormais résiliente, auditable et prête pour une mise en production industrialisée.
 
 ---
