@@ -199,6 +199,11 @@ Playbooks d'automatisation des mises à jour système (Windows Updates & Apt-Upg
 Ce projet démontre une approche DevSecOps de l'administration système, où l'automatisation et la sécurité sont intégrées dès la conception. L'infrastructure est désormais résiliente, auditable et prête pour une mise en production industrialisée.
 
 ---
+## Licence
+Ce projet est sous licence **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
+Toute utilisation commerciale est strictement interdite sans autorisation préalable. Consultez le fichier [LICENSE](./LICENSE) pour plus de détails.
+
+---
 **Auteur** : Rousseau Alexis
 
 **Rôle** : Administrateur Systèmes, Réseaux & Cybersécurité
